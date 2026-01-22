@@ -9,8 +9,8 @@ echo.
 echo Starting Ngrok tunnel...
 echo.
 
-REM Start ngrok in a new window
-start "Ngrok Tunnel" cmd /k "ngrok http 3000"
+REM Start ngrok in a new window (navigate to ngrok directory first)
+start "Ngrok Tunnel" cmd /k "cd /d C:\ngrok-v3-stable-windows-amd64 && ngrok http 3000"
 
 REM Wait 3 seconds for ngrok to start
 timeout /t 3 /nobreak > nul
