@@ -1,0 +1,39 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to Hostinger VPS
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOSTINGER_HOST }}
+        username: ${{ secrets.HOSTINGER_USERNAME }}
+        key: ${{ secrets.HOSTINGER_SSH_KEY }}
+        port: ${{ secrets.HOSTINGER_PORT }}
+        script: |
+          cd /home/${{ secrets.HOSTINGER_USERNAME }}/trustednutra
+          git pull origin main
+          cd webhook-server
+          npm install --production
+          pm2 restart trustednutra-webhook || pm2 start ../ecosystem.config.js
+          pm2 save
+          echo "Deployment completed successfully!"
+
+    - name: Deployment Status
+      if: success()
+      run: echo "✅ Successfully deployed to Hostinger!"
+
+    - name: Deployment Failed
+      if: failure()
+      run: echo "❌ Deployment failed. Check logs."

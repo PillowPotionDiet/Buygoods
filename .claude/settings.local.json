@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(find:*)",
+      "Read(//g/TrustedNutraProducts/**)",
+      "Bash(powershell -Command \"Get-ChildItem -Recurse -File | Select-Object FullName, Length, Extension | Format-Table -AutoSize\")",
+      "Bash(powershell -Command:*)",
+      "Bash(sort:*)",
+      "Bash(tree:*)",
+      "Bash(du:*)",
+      "Bash(node test-webhook.js:*)",
+      "Bash(git init:*)",
+      "Bash(move project_launch.html index.html)",
+      "Bash(git add:*)",
+      "Bash(git config:*)"
+    ]
+  }
+}
