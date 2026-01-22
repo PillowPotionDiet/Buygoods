@@ -626,11 +626,19 @@
         }
 
         .tab-content {
-            display: none;
+            display: none !important;
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            left: -9999px;
         }
 
         .tab-content.active {
-            display: block;
+            display: block !important;
+            visibility: visible;
+            opacity: 1;
+            position: relative;
+            left: 0;
         }
 
         /* Launched Products Tab Styles */
@@ -5613,9 +5621,12 @@
 
         // Tab Switching Function
         function showTab(tabName, updateHash = true) {
-            // Hide all tab contents
+            console.log('Switching to tab:', tabName);
+
+            // Hide all tab contents completely
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
+                tab.style.display = 'none';
             });
 
             // Remove active class from all buttons
@@ -5624,7 +5635,14 @@
             });
 
             // Show selected tab
-            document.getElementById(tabName + '-tab').classList.add('active');
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                selectedTab.style.display = 'block';
+                console.log('Showing tab:', tabName);
+            } else {
+                console.error('Tab not found:', tabName);
+            }
 
             // Add active class to clicked button
             const buttons = document.querySelectorAll('.tab-btn');
@@ -5639,6 +5657,9 @@
                 // Load analytics data when tab is opened
                 initializeAnalytics();
             }
+
+            // Scroll to top
+            window.scrollTo(0, 0);
 
             // Update URL hash
             if (updateHash) {
