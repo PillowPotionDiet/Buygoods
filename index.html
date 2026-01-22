@@ -625,6 +625,19 @@
             box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
         }
 
+        /* Quick range button styles */
+        .quick-range-btn:hover {
+            background: #e5e7eb !important;
+            border-color: #d1d5db !important;
+        }
+
+        .quick-range-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
         .tab-content {
             display: none !important;
             visibility: hidden;
@@ -1506,7 +1519,7 @@
         <header>
             <h1>Project Launch - Trusted Nutra Products</h1>
             <p>Full Stack Fulfillment & Jetpack Stock Products - Combined Catalog 2025</p>
-            <div style="margin-top: 10px; opacity: 0.7; font-size: 0.85rem;">v2.1.1 - Updated Jan 22, 2026</div>
+            <div style="margin-top: 10px; opacity: 0.7; font-size: 0.85rem;">v2.2.0 - Updated Jan 23, 2026</div>
         </header>
 
         <!-- TAB NAVIGATION -->
@@ -4723,10 +4736,10 @@
                     <button onclick="loadAnalyticsData()" style="padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s;">
                         🔄 Refresh Data
                     </button>
-                    <button onclick="setQuickRange('today')" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">Today</button>
-                    <button onclick="setQuickRange('week')" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">This Week</button>
-                    <button onclick="setQuickRange('month')" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">This Month</button>
-                    <button onclick="setQuickRange('all')" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">All Time</button>
+                    <button onclick="setQuickRange('today')" class="quick-range-btn" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">Today</button>
+                    <button onclick="setQuickRange('week')" class="quick-range-btn" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">This Week</button>
+                    <button onclick="setQuickRange('month')" class="quick-range-btn" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">This Month</button>
+                    <button onclick="setQuickRange('all')" class="quick-range-btn" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">All Time</button>
                 </div>
             </div>
 
@@ -4737,6 +4750,40 @@
                 <span id="last-update">Last updated: Never</span>
             </div>
 
+            <!-- Overall Stats Summary -->
+            <div id="overall-stats-section" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                <h3 style="color: #1e293b; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>📈</span> Overall Performance
+                </h3>
+                <div id="overall-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <!-- Stats cards will be inserted here by JavaScript -->
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; border: 2px solid #bae6fd;">
+                        <div style="font-size: 0.85rem; color: #0369a1; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Total Revenue</div>
+                        <div id="stat-total-revenue" style="font-size: 2.5rem; font-weight: 700; color: #059669;">$0</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; border: 2px solid #fcd34d;">
+                        <div style="font-size: 0.85rem; color: #92400e; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Total Orders</div>
+                        <div id="stat-total-orders" style="font-size: 2.5rem; font-weight: 700; color: #1e293b;">0</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); border-radius: 12px; border: 2px solid #d8b4fe;">
+                        <div style="font-size: 0.85rem; color: #6b21a8; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Avg Order Value</div>
+                        <div id="stat-aov" style="font-size: 2.5rem; font-weight: 700; color: #7c3aed;">$0</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border-radius: 12px; border: 2px solid #f9a8d4;">
+                        <div style="font-size: 0.85rem; color: #9f1239; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Total Units</div>
+                        <div id="stat-total-units" style="font-size: 2.5rem; font-weight: 700; color: #ec4899;">0</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 12px; border: 2px solid #93c5fd;">
+                        <div style="font-size: 0.85rem; color: #1e40af; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Products Active</div>
+                        <div id="stat-products-count" style="font-size: 2.5rem; font-weight: 700; color: #2563eb;">0</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 12px; border: 2px solid #6ee7b7;">
+                        <div style="font-size: 0.85rem; color: #065f46; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Conversion Rate</div>
+                        <div id="stat-conversion-rate" style="font-size: 2.5rem; font-weight: 700; color: #10b981;">0%</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Products Grid -->
             <div id="analytics-products-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 25px; margin-bottom: 30px;">
                 <!-- Product cards will be inserted here by JavaScript -->
@@ -4745,10 +4792,49 @@
             <!-- Recent Orders Live Feed -->
             <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
                 <h3 style="color: #1e293b; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <span>📦</span> Recent Orders
+                    <span>📦</span> Recent Orders (Last 20)
                 </h3>
                 <div id="recent-orders-feed" style="max-height: 500px; overflow-y: auto;">
                     <!-- Recent orders will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Detailed Orders Table -->
+            <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                <h3 style="color: #1e293b; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>📊</span> All Orders - Detailed View
+                </h3>
+                <div style="overflow-x: auto; max-height: 600px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 10px;">
+                    <table id="orders-table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="padding: 12px; text-align: left; white-space: nowrap;">Order ID</th>
+                                <th style="padding: 12px; text-align: left; white-space: nowrap;">Date</th>
+                                <th style="padding: 12px; text-align: left;">Product</th>
+                                <th style="padding: 12px; text-align: left;">Package</th>
+                                <th style="padding: 12px; text-align: center;">Qty</th>
+                                <th style="padding: 12px; text-align: right;">Amount</th>
+                                <th style="padding: 12px; text-align: right;">Shipping</th>
+                                <th style="padding: 12px; text-align: right;">Total</th>
+                                <th style="padding: 12px; text-align: left;">Customer</th>
+                                <th style="padding: 12px; text-align: left;">Email</th>
+                                <th style="padding: 12px; text-align: center;">Country</th>
+                                <th style="padding: 12px; text-align: center;">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <tr>
+                                <td colspan="12" style="padding: 40px; text-align: center; color: #64748b;">
+                                    <div style="font-size: 3rem; margin-bottom: 10px;">📊</div>
+                                    <div>Loading orders...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="orders-table-summary" style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div style="font-weight: 600; color: #374151;">Total: <span id="table-total-orders">0</span> orders</div>
+                    <div style="font-weight: 600; color: #059669;">Total Revenue: $<span id="table-total-revenue">0</span></div>
                 </div>
             </div>
 
@@ -5561,26 +5647,40 @@
 
         // Set quick date ranges
         function setQuickRange(range) {
-            const endDate = new Date();
+            const today = new Date();
             let startDate = new Date();
+            let endDate = new Date();
 
             switch(range) {
                 case 'today':
-                    startDate = new Date();
+                    startDate = today;
+                    endDate = today;
                     break;
                 case 'week':
-                    startDate.setDate(startDate.getDate() - 7);
+                    // Calculate Monday-Sunday week (Buygoods standard)
+                    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday, go back 6 days to Monday
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - daysFromMonday); // Set to Monday
+                    endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 6); // Set to Sunday
                     break;
                 case 'month':
-                    startDate.setDate(startDate.getDate() - 30);
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First day of month
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Last day of month
                     break;
                 case 'all':
                     startDate = new Date('2025-01-01');
+                    endDate = today;
                     break;
             }
 
             document.getElementById('start-date').value = startDate.toISOString().split('T')[0];
             document.getElementById('end-date').value = endDate.toISOString().split('T')[0];
+
+            // Highlight active button
+            document.querySelectorAll('.quick-range-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
 
             loadAnalyticsData();
         }
@@ -5598,6 +5698,7 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    renderOverallStats(data.data);
                     renderProductCards(data.data);
                     updateLastUpdate();
                 } else {
@@ -5606,11 +5707,38 @@
 
                 // Fetch recent orders
                 loadRecentOrders();
+                // Fetch all orders for detailed table
+                loadAllOrders(startDate, endDate, productFilter);
 
             } catch (error) {
                 console.error('Error loading analytics:', error);
                 showError('Cannot connect to webhook server. Make sure it\'s running on ' + API_URL);
             }
+        }
+
+        // Render overall stats summary
+        function renderOverallStats(products) {
+            let totalRevenue = 0;
+            let totalOrders = 0;
+            let totalUnits = 0;
+            let productsCount = products.length;
+
+            products.forEach(product => {
+                totalRevenue += parseFloat(product.total_revenue || 0);
+                totalOrders += parseInt(product.total_orders || 0);
+                totalUnits += parseInt(product.total_units || 0);
+            });
+
+            const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
+            // For conversion rate, we'd need traffic data - using placeholder for now
+            const conversionRate = 0; // Placeholder
+
+            document.getElementById('stat-total-revenue').textContent = '$' + totalRevenue.toFixed(2);
+            document.getElementById('stat-total-orders').textContent = totalOrders;
+            document.getElementById('stat-aov').textContent = '$' + avgOrderValue.toFixed(2);
+            document.getElementById('stat-total-units').textContent = totalUnits;
+            document.getElementById('stat-products-count').textContent = productsCount;
+            document.getElementById('stat-conversion-rate').textContent = conversionRate + '%';
         }
 
         // Render product cards
@@ -5761,6 +5889,104 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Load all orders for detailed table
+        async function loadAllOrders(startDate, endDate, productFilter) {
+            try {
+                let url = `${API_URL}/api/orders/range?start_date=${startDate}&end_date=${endDate}`;
+                if (productFilter) {
+                    url += `&product=${encodeURIComponent(productFilter)}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    renderOrdersTable(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading all orders:', error);
+                document.getElementById('orders-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="12" style="padding: 40px; text-align: center; color: #dc2626;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">⚠️</div>
+                            <div>Failed to load orders</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render orders in detailed table
+        function renderOrdersTable(orders) {
+            const tbody = document.getElementById('orders-table-body');
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="12" style="padding: 40px; text-align: center; color: #64748b;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+                            <div>No orders found for the selected date range</div>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('table-total-orders').textContent = '0';
+                document.getElementById('table-total-revenue').textContent = '0.00';
+                return;
+            }
+
+            let totalRevenue = 0;
+
+            tbody.innerHTML = orders.map((order, index) => {
+                totalRevenue += parseFloat(order.total || 0);
+
+                const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
+                const productBadgeColor = order.product_name.includes('Meta') ?
+                    'background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);' :
+                    'background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);';
+
+                const typeBadge = order.is_upsell ?
+                    '<span style="background: #fbbf24; color: #78350f; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">UPSELL</span>' :
+                    order.is_recurring ?
+                    '<span style="background: #8b5cf6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">RECURRING</span>' :
+                    '<span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">NEW</span>';
+
+                return `
+                    <tr style="background: ${rowBg}; transition: background 0.2s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='${rowBg}'">
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-family: monospace; font-size: 0.8rem; color: #6366f1;">${order.order_id}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; white-space: nowrap;">${formatDateTime(order.order_date)}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                            <div style="${productBadgeColor} color: white; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; display: inline-block;">
+                                ${order.product_name}
+                            </div>
+                        </td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${order.package_type}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; font-weight: 600;">${order.quantity}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600; color: #64748b;">$${(order.amount || 0).toFixed(2)}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #64748b;">$${(order.shipping || 0).toFixed(2)}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 700; color: #059669; font-size: 1rem;">$${(order.total || 0).toFixed(2)}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${order.customer_name || 'N/A'}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 0.8rem; color: #64748b;">${order.customer_email || 'N/A'}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">
+                            <span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">${order.customer_country || 'N/A'}</span>
+                        </td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">${typeBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('table-total-orders').textContent = orders.length;
+            document.getElementById('table-total-revenue').textContent = totalRevenue.toFixed(2);
+        }
+
+        // Format datetime for table
+        function formatDateTime(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+                   '<br><span style="color: #94a3b8; font-size: 0.75rem;">' +
+                   date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '</span>';
         }
 
         // Helper functions

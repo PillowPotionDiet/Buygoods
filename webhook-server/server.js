@@ -420,6 +420,28 @@ app.get('/api/orders/recent', (req, res) => {
   }
 });
 
+// Get all orders by date range (for detailed table)
+app.get('/api/orders/range', (req, res) => {
+  try {
+    const { start_date, end_date, product } = req.query;
+
+    const startDate = start_date || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const endDate = end_date || new Date().toISOString().split('T')[0];
+
+    const orders = getOrdersByDateRange(startDate, endDate, product || null);
+
+    res.json({
+      success: true,
+      data: orders,
+      count: orders.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching orders by range:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Get total stats
 app.get('/api/stats/total', (req, res) => {
   try {
