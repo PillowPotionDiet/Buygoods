@@ -85,27 +85,28 @@ function extractProductName(productName) {
 // 1. NEW ORDER WEBHOOK
 app.post('/webhook/new-order', (req, res) => {
   try {
-    console.log('📦 New order received:', req.body);
+    console.log('📦 New order received:');
+    console.log('Full request body:', JSON.stringify(req.body, null, 2));
 
     const data = req.body;
     const { quantity, normalizedPackage } = parsePackageInfo(data.product_name, data.package_type);
 
     const orderData = {
-      order_id: data.order_id || data.id,
-      product_name: extractProductName(data.product_name),
-      product_id: data.product_id || null,
+      order_id: data.order_id || data.id || data.register_id || `BG-${Date.now()}`,
+      product_name: extractProductName(data.product_name || data.product),
+      product_id: data.product_id || data.sku || null,
       package_type: normalizedPackage,
       quantity: quantity,
-      amount: parseFloat(data.amount || data.subtotal || 0),
-      shipping: parseFloat(data.shipping || 0),
-      total: parseFloat(data.total || data.order_total || 0),
-      customer_email: data.customer_email || data.email,
-      customer_name: data.customer_name || `${data.first_name || ''} ${data.last_name || ''}`.trim(),
-      customer_country: data.country || data.customer_country || 'US',
-      order_date: data.created_at || data.order_date || new Date().toISOString(),
-      status: 'completed',
+      amount: parseFloat(data.amount || data.subtotal || data.product_price || 0),
+      shipping: parseFloat(data.shipping || data.shipping_cost_total || 0),
+      total: parseFloat(data.total || data.order_total || data.total_comma || 0),
+      customer_email: data.customer_email || data.email || data.shipping_email || 'unknown@email.com',
+      customer_name: data.customer_name || data.shipping_name || `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Unknown',
+      customer_country: data.country || data.customer_country || data.country_2letter || data.shipping_country || 'US',
+      order_date: data.created_at || data.order_date || data.timestamp || new Date().toISOString(),
+      status: data.payment_status === 'Complete' || data.payment_status === 'Completed' ? 'completed' : 'completed',
       is_upsell: data.is_upsell || (normalizedPackage.includes('Upgrade') ? 1 : 0),
-      is_recurring: data.is_recurring || 0,
+      is_recurring: data.is_recurring || data.RUNNING_OFFLINE === '1' ? 1 : 0,
       affiliate_id: data.affiliate_id || data.aff_id || null
     };
 
@@ -121,6 +122,7 @@ app.post('/webhook/new-order', (req, res) => {
 
   } catch (error) {
     console.error('❌ Error processing new order:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -268,6 +270,69 @@ app.post('/webhook/recurring', (req, res) => {
 
   } catch (error) {
     console.error('❌ Error processing recurring charge:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Alias: /webhook/cancellation (for Buygoods compatibility)
+app.post('/webhook/cancellation', (req, res) => {
+  try {
+    console.log('🚫 Order cancellation:', req.body);
+
+    const data = req.body;
+
+    updateOrderStatus.run({
+      order_id: data.order_id || data.id || data.register_id,
+      status: 'cancelled'
+    });
+
+    console.log('✅ Order cancelled:', data.order_id);
+
+    res.status(200).json({ success: true, message: 'Order cancelled' });
+
+  } catch (error) {
+    console.error('❌ Error processing cancellation:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Alias: /webhook/recurring-order (for Buygoods compatibility)
+app.post('/webhook/recurring-order', (req, res) => {
+  try {
+    console.log('🔄 Recurring order:');
+    console.log('Full request body:', JSON.stringify(req.body, null, 2));
+
+    const data = req.body;
+    const { quantity, normalizedPackage } = parsePackageInfo(data.product_name || data.product, data.package_type);
+
+    const orderData = {
+      order_id: data.order_id || data.id || data.register_id || `REC-${Date.now()}`,
+      product_name: extractProductName(data.product_name || data.product),
+      product_id: data.product_id || data.sku || null,
+      package_type: normalizedPackage,
+      quantity: quantity,
+      amount: parseFloat(data.amount || data.subtotal || data.product_price || 0),
+      shipping: parseFloat(data.shipping || data.shipping_cost_total || 0),
+      total: parseFloat(data.total || data.order_total || data.total_comma || 0),
+      customer_email: data.customer_email || data.email || data.shipping_email || 'unknown@email.com',
+      customer_name: data.customer_name || data.shipping_name || `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Unknown',
+      customer_country: data.country || data.customer_country || data.country_2letter || data.shipping_country || 'US',
+      order_date: data.created_at || data.order_date || data.timestamp || new Date().toISOString(),
+      status: 'completed',
+      is_upsell: 0,
+      is_recurring: 1,
+      affiliate_id: data.affiliate_id || data.aff_id || null
+    };
+
+    insertOrder.run(orderData);
+
+    console.log('✅ Recurring order saved:', orderData.order_id);
+
+    res.status(200).json({ success: true, message: 'Recurring order recorded' });
+
+  } catch (error) {
+    console.error('❌ Error processing recurring order:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ success: false, error: error.message });
   }
 });
