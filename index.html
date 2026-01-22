@@ -604,24 +604,24 @@
             gap: 10px;
         }
 
-        .tab-btn:hover {
+        .tab-btn:hover:not(.active) {
             background: #e2e8f0;
             color: #475569;
         }
 
         .tab-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            color: white !important;
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
         .tab-btn.active.launched-tab {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
             box-shadow: 0 5px 20px rgba(5, 150, 105, 0.4);
         }
 
         .tab-btn.analytics-tab.active {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
             box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
         }
 
