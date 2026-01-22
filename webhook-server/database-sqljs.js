@@ -31,6 +31,7 @@ async function initializeDatabase() {
       amount DECIMAL(10,2),
       shipping DECIMAL(10,2),
       total DECIMAL(10,2),
+      vendor_net DECIMAL(10,2),
       customer_email TEXT,
       customer_name TEXT,
       customer_country TEXT,
@@ -111,17 +112,18 @@ const insertOrder = {
       const stmt = db.prepare(`
         INSERT OR REPLACE INTO orders (
           order_id, product_name, product_id, package_type, quantity,
-          amount, shipping, total, customer_email, customer_name,
+          amount, shipping, total, vendor_net, customer_email, customer_name,
           customer_country, order_date, status, is_upsell, is_recurring, affiliate_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       stmt.run([
         orderData.order_id, orderData.product_name, orderData.product_id,
         orderData.package_type, orderData.quantity, orderData.amount,
-        orderData.shipping, orderData.total, orderData.customer_email,
-        orderData.customer_name, orderData.customer_country, orderData.order_date,
-        orderData.status, orderData.is_upsell, orderData.is_recurring, orderData.affiliate_id
+        orderData.shipping, orderData.total, orderData.vendor_net || 0,
+        orderData.customer_email, orderData.customer_name, orderData.customer_country,
+        orderData.order_date, orderData.status, orderData.is_upsell,
+        orderData.is_recurring, orderData.affiliate_id
       ]);
 
       stmt.free();
@@ -272,6 +274,7 @@ function getProductSummary(startDate, endDate) {
         product_name,
         COUNT(*) as total_orders,
         SUM(total) as total_revenue,
+        SUM(vendor_net) as total_profit,
         SUM(quantity) as total_units,
         AVG(total) as avg_order_value,
         MIN(order_date) as first_order,

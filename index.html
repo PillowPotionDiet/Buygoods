@@ -1519,7 +1519,7 @@
         <header>
             <h1>Project Launch - Trusted Nutra Products</h1>
             <p>Full Stack Fulfillment & Jetpack Stock Products - Combined Catalog 2025</p>
-            <div style="margin-top: 10px; opacity: 0.7; font-size: 0.85rem;">v2.2.0 - Updated Jan 23, 2026</div>
+            <div style="margin-top: 10px; opacity: 0.7; font-size: 0.85rem;">v2.3.0 - Updated Jan 23, 2026</div>
         </header>
 
         <!-- TAB NAVIGATION -->
@@ -4778,8 +4778,8 @@
                         <div id="stat-products-count" style="font-size: 2.5rem; font-weight: 700; color: #2563eb;">0</div>
                     </div>
                     <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 12px; border: 2px solid #6ee7b7;">
-                        <div style="font-size: 0.85rem; color: #065f46; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Conversion Rate</div>
-                        <div id="stat-conversion-rate" style="font-size: 2.5rem; font-weight: 700; color: #10b981;">0%</div>
+                        <div style="font-size: 0.85rem; color: #065f46; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">💰 Net Profit</div>
+                        <div id="stat-net-profit" style="font-size: 2.5rem; font-weight: 700; color: #059669;">$0</div>
                     </div>
                 </div>
             </div>
@@ -4787,16 +4787,6 @@
             <!-- Products Grid -->
             <div id="analytics-products-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 25px; margin-bottom: 30px;">
                 <!-- Product cards will be inserted here by JavaScript -->
-            </div>
-
-            <!-- Recent Orders Live Feed -->
-            <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
-                <h3 style="color: #1e293b; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <span>📦</span> Recent Orders (Last 20)
-                </h3>
-                <div id="recent-orders-feed" style="max-height: 500px; overflow-y: auto;">
-                    <!-- Recent orders will be inserted here -->
-                </div>
             </div>
 
             <!-- Detailed Orders Table -->
@@ -5705,8 +5695,6 @@
                     showError('Failed to load analytics data');
                 }
 
-                // Fetch recent orders
-                loadRecentOrders();
                 // Fetch all orders for detailed table
                 loadAllOrders(startDate, endDate, productFilter);
 
@@ -5719,26 +5707,26 @@
         // Render overall stats summary
         function renderOverallStats(products) {
             let totalRevenue = 0;
+            let totalProfit = 0;
             let totalOrders = 0;
             let totalUnits = 0;
             let productsCount = products.length;
 
             products.forEach(product => {
                 totalRevenue += parseFloat(product.total_revenue || 0);
+                totalProfit += parseFloat(product.total_profit || 0);
                 totalOrders += parseInt(product.total_orders || 0);
                 totalUnits += parseInt(product.total_units || 0);
             });
 
             const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
-            // For conversion rate, we'd need traffic data - using placeholder for now
-            const conversionRate = 0; // Placeholder
 
             document.getElementById('stat-total-revenue').textContent = '$' + totalRevenue.toFixed(2);
             document.getElementById('stat-total-orders').textContent = totalOrders;
             document.getElementById('stat-aov').textContent = '$' + avgOrderValue.toFixed(2);
             document.getElementById('stat-total-units').textContent = totalUnits;
             document.getElementById('stat-products-count').textContent = productsCount;
-            document.getElementById('stat-conversion-rate').textContent = conversionRate + '%';
+            document.getElementById('stat-net-profit').textContent = '$' + totalProfit.toFixed(2);
         }
 
         // Render product cards
