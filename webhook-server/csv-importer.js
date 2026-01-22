@@ -1,15 +1,17 @@
 const fs = require('fs');
 const path = require('path');
-const { bulkInsertOrders } = require('./database');
+const { initializeDatabase, insertOrder } = require('./database-sqljs');
 
-// Helper function to parse CSV
+// Helper function to parse CSV with proper quoted field handling
 function parseCSV(csvContent) {
   const lines = csvContent.split('\n').filter(line => line.trim());
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+  // Parse headers
+  const headers = parseCSVLine(lines[0]);
 
   const data = [];
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+    const values = parseCSVLine(lines[i]);
     const row = {};
 
     headers.forEach((header, index) => {
@@ -20,6 +22,40 @@ function parseCSV(csvContent) {
   }
 
   return data;
+}
+
+// Parse a single CSV line handling quoted fields
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        current += '"';
+        i++; // Skip next quote
+      } else {
+        // Toggle quote mode
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // End of field
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  // Push last field
+  result.push(current.trim());
+
+  return result;
 }
 
 // Helper to parse package type and quantity from Buygoods CSV
@@ -89,47 +125,81 @@ function importBuygoodsCSV(csvFilePath) {
 
     console.log(`📊 Found ${rows.length} rows in CSV`);
 
-    const orders = rows.map(row => {
-      const { quantity, normalizedPackage } = parsePackageFromCSV(
-        row['Product Name'] || row['Product'],
-        row['Item Name'] || row['Item']
-      );
+    let imported = 0;
+    let skipped = 0;
+    let errors = 0;
 
-      // Parse amounts - remove $ and convert to float
-      const parseAmount = (val) => {
-        if (!val) return 0;
-        return parseFloat(val.toString().replace(/[$,]/g, '')) || 0;
-      };
+    rows.forEach((row, index) => {
+      try {
+        // Skip test orders
+        if (row['Is Test'] === '1') {
+          skipped++;
+          return;
+        }
 
-      return {
-        order_id: row['Order #'] || row['Order ID'] || `IMP-${Date.now()}-${Math.random()}`,
-        product_name: extractProductName(row['Product Name'] || row['Product']),
-        product_id: null,
-        package_type: normalizedPackage,
-        quantity: quantity,
-        amount: parseAmount(row['Item Total'] || row['Amount'] || row['Subtotal']),
-        shipping: parseAmount(row['Shipping'] || 0),
-        total: parseAmount(row['Total'] || row['Order Total']),
-        customer_email: row['Email'] || row['Customer Email'] || 'imported@example.com',
-        customer_name: row['Customer Name'] || row['Name'] || 'Imported Customer',
-        customer_country: row['Country'] || 'US',
-        order_date: parseDate(row['Date'] || row['Order Date']),
-        status: 'completed',
-        is_upsell: normalizedPackage.includes('Upgrade') ? 1 : 0,
-        is_recurring: 0,
-        affiliate_id: null
-      };
+        // Parse product names from "Product Names" field
+        const productNames = row['Product Names'] || '';
+        const { quantity, normalizedPackage } = parsePackageFromCSV(productNames, productNames);
+
+        // Parse amounts - remove $ and convert to float
+        const parseAmount = (val) => {
+          if (!val) return 0;
+          return parseFloat(val.toString().replace(/[$,]/g, '')) || 0;
+        };
+
+        // Parse date from "Date Created" field (format: "2026-01-08 08:05:15")
+        const orderDate = row['Date Created'] || new Date().toISOString();
+
+        const orderData = {
+          order_id: row['Order ID'] || `IMP-${Date.now()}-${index}`,
+          product_name: extractProductName(productNames),
+          product_id: row['SKU'] || null,
+          package_type: normalizedPackage,
+          quantity: quantity,
+          amount: parseAmount(row['Vendor Net']) || parseAmount(row['Total collected (Transaction Amount)']),
+          shipping: parseAmount(row['Average Shipping Cost']) || 0,
+          total: parseAmount(row['Total collected (Transaction Amount)']),
+          customer_email: row['Customer Email Address'] || 'imported@example.com',
+          customer_name: row['Customer Name'] || 'Imported Customer',
+          customer_country: row['Country'] || 'US',
+          order_date: orderDate,
+          status: row['Status'] === 'Completed' ? 'completed' : 'completed',
+          is_upsell: parseInt(row['Flag Upsell']) === 1 ? 1 : 0,
+          is_recurring: 0,
+          affiliate_id: row['Affiliate ID'] || null
+        };
+
+        // Insert order using sql.js pattern
+        insertOrder.run(orderData);
+        imported++;
+
+        if (imported % 50 === 0) {
+          console.log(`   Imported ${imported} orders...`);
+        }
+
+      } catch (error) {
+        errors++;
+        console.error(`❌ Error importing row ${index}:`, error.message);
+      }
     });
 
-    console.log(`💾 Importing ${orders.length} orders into database...`);
-
-    bulkInsertOrders(orders);
-
-    console.log(`✅ Successfully imported ${orders.length} orders from ${path.basename(csvFilePath)}`);
+    console.log(`
+╔════════════════════════════════════════════╗
+║   ✅ CSV Import Complete                  ║
+║                                            ║
+║   Total Rows: ${rows.length.toString().padEnd(30)}║
+║   Imported: ${imported.toString().padEnd(32)}║
+║   Skipped (Test): ${skipped.toString().padEnd(26)}║
+║   Errors: ${errors.toString().padEnd(34)}║
+║                                            ║
+╚════════════════════════════════════════════╝
+    `);
 
     return {
       success: true,
-      imported: orders.length,
+      imported: imported,
+      skipped: skipped,
+      errors: errors,
       file: path.basename(csvFilePath)
     };
 
@@ -180,43 +250,46 @@ function importAllCSVs(directoryPath) {
 
 // Command line usage
 if (require.main === module) {
-  const { initializeDatabase } = require('./database');
+  (async () => {
+    // Initialize database first
+    await initializeDatabase();
 
-  // Initialize database first
-  initializeDatabase();
+    const args = process.argv.slice(2);
 
-  const args = process.argv.slice(2);
-
-  if (args.length === 0) {
-    console.log(`
+    if (args.length === 0) {
+      console.log(`
 Usage:
   node csv-importer.js <file-or-directory>
 
 Examples:
-  node csv-importer.js "../Sales Record/OrdersReportMetaTrimTillJan-17_01-21-2026_7_11943.csv"
+  node csv-importer.js "../Sales Record/OrdersReport_01-22-2026_19_11943.csv"
   node csv-importer.js "../Sales Record"
-    `);
-    process.exit(1);
-  }
+      `);
+      process.exit(1);
+    }
 
-  const target = args[0];
-  const targetPath = path.resolve(target);
+    const target = args[0];
+    const targetPath = path.resolve(target);
 
-  if (!fs.existsSync(targetPath)) {
-    console.error(`❌ Path not found: ${targetPath}`);
-    process.exit(1);
-  }
+    if (!fs.existsSync(targetPath)) {
+      console.error(`❌ Path not found: ${targetPath}`);
+      process.exit(1);
+    }
 
-  const stats = fs.statSync(targetPath);
+    const stats = fs.statSync(targetPath);
 
-  if (stats.isDirectory()) {
-    importAllCSVs(targetPath);
-  } else if (stats.isFile() && targetPath.endsWith('.csv')) {
-    importBuygoodsCSV(targetPath);
-  } else {
-    console.error('❌ Please provide a CSV file or directory containing CSV files');
-    process.exit(1);
-  }
+    if (stats.isDirectory()) {
+      importAllCSVs(targetPath);
+    } else if (stats.isFile() && targetPath.endsWith('.csv')) {
+      importBuygoodsCSV(targetPath);
+    } else {
+      console.error('❌ Please provide a CSV file or directory containing CSV files');
+      process.exit(1);
+    }
+
+    console.log('\n✅ Import complete! You can now view the data in Analytics tab.');
+    process.exit(0);
+  })();
 }
 
 module.exports = {

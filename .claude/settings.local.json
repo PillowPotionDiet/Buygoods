@@ -23,7 +23,9 @@
       "Bash(del trustednutra.db)",
       "Bash(npm install:*)",
       "Bash(cmd /c npm install xlsx)",
-      "Bash(where npm:*)"
+      "Bash(where npm:*)",
+      "Bash(node csv-importer.js:*)",
+      "Bash(node:*)"
     ]
   }
 }
