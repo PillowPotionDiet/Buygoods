@@ -1519,7 +1519,7 @@
         <header>
             <h1>Project Launch - Trusted Nutra Products</h1>
             <p>Full Stack Fulfillment & Jetpack Stock Products - Combined Catalog 2025</p>
-            <div style="margin-top: 10px; opacity: 0.7; font-size: 0.85rem;">v2.3.0 - Updated Jan 23, 2026</div>
+            <div style="margin-top: 10px; opacity: 0.7; font-size: 0.85rem;">v2.3.1 - Updated Jan 23, 2026</div>
         </header>
 
         <!-- TAB NAVIGATION -->
@@ -4803,7 +4803,7 @@
                                 <th style="padding: 12px; text-align: left;">Product</th>
                                 <th style="padding: 12px; text-align: left;">Package</th>
                                 <th style="padding: 12px; text-align: center;">Qty</th>
-                                <th style="padding: 12px; text-align: right;">Amount</th>
+                                <th style="padding: 12px; text-align: right;">💰 Profit</th>
                                 <th style="padding: 12px; text-align: right;">Shipping</th>
                                 <th style="padding: 12px; text-align: right;">Total</th>
                                 <th style="padding: 12px; text-align: left;">Customer</th>
@@ -4824,7 +4824,7 @@
                 </div>
                 <div id="orders-table-summary" style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div style="font-weight: 600; color: #374151;">Total: <span id="table-total-orders">0</span> orders</div>
-                    <div style="font-weight: 600; color: #059669;">Total Revenue: $<span id="table-total-revenue">0</span></div>
+                    <div style="font-weight: 600; color: #059669;">💰 Total Profit: $<span id="table-total-profit">0</span></div>
                 </div>
             </div>
 
@@ -5920,14 +5920,14 @@
                     </tr>
                 `;
                 document.getElementById('table-total-orders').textContent = '0';
-                document.getElementById('table-total-revenue').textContent = '0.00';
+                document.getElementById('table-total-profit').textContent = '0.00';
                 return;
             }
 
-            let totalRevenue = 0;
+            let totalProfit = 0;
 
             tbody.innerHTML = orders.map((order, index) => {
-                totalRevenue += parseFloat(order.total || 0);
+                totalProfit += parseFloat(order.vendor_net || 0);
 
                 const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
                 const productBadgeColor = order.product_name.includes('Meta') ?
@@ -5951,9 +5951,9 @@
                         </td>
                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${order.package_type}</td>
                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; font-weight: 600;">${order.quantity}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600; color: #64748b;">$${(order.amount || 0).toFixed(2)}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 700; color: #059669; font-size: 1rem;">$${(order.vendor_net || 0).toFixed(2)}</td>
                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #64748b;">$${(order.shipping || 0).toFixed(2)}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 700; color: #059669; font-size: 1rem;">$${(order.total || 0).toFixed(2)}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600; color: #374151;">$${(order.total || 0).toFixed(2)}</td>
                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${order.customer_name || 'N/A'}</td>
                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 0.8rem; color: #64748b;">${order.customer_email || 'N/A'}</td>
                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">
@@ -5965,7 +5965,7 @@
             }).join('');
 
             document.getElementById('table-total-orders').textContent = orders.length;
-            document.getElementById('table-total-revenue').textContent = totalRevenue.toFixed(2);
+            document.getElementById('table-total-profit').textContent = totalProfit.toFixed(2);
         }
 
         // Format datetime for table
